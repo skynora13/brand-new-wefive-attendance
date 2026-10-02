@@ -5,9 +5,10 @@ import { prisma } from "@/lib/prisma";
 
 export async function PUT(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const session = await getServerSession(authOptions);
     if (!session || session.user.role !== "MEMBER") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -16,7 +17,7 @@ export async function PUT(
     const { status, progress, notes } = await request.json();
 
     const assignment = await prisma.topicAssignment.findUnique({
-      where: { id: params.id },
+      where: { id: id },
       include: { topic: true },
     });
 
@@ -25,7 +26,7 @@ export async function PUT(
     }
 
     const updated = await prisma.topicAssignment.update({
-      where: { id: params.id },
+      where: { id: id },
       data: {
         status: status || assignment.status,
         progress: progress !== undefined ? progress : assignment.progress,
