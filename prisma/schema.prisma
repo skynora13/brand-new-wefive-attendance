@@ -19,6 +19,7 @@ model Organization {
   users     User[]
   shifts    Shift[]
   holidays  Holiday[]
+  topics    Topic[]
 }
 
 model User {
@@ -52,6 +53,13 @@ model User {
   createdMeetings Meeting[] @relation("CreatedMeetings")
   meetingParticipations MeetingParticipant[] @relation("MeetingParticipations")
   scorecards     PerformanceScorecard[]
+
+  createdTopics       Topic[] @relation("CreatedTopics")
+  assignedTopics      TopicAssignment[] @relation("AssignedTopics")
+  assignedTopicActions TopicAssignment[] @relation("AssignedTopicActions")
+  previousMemberHistory TopicAssignmentHistory[] @relation("PreviousMemberHistory")
+  newMemberHistory    TopicAssignmentHistory[] @relation("NewMemberHistory")
+  historyAssigner     TopicAssignmentHistory[] @relation("HistoryAssigner")
 }
 
 model Shift {
@@ -267,4 +275,70 @@ model PerformanceScorecard {
   user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, month])
+}
+
+model Topic {
+  id                String   @id @default(cuid())
+  title             String
+  description       String?
+  category          String?
+  difficulty        String?
+  priority          String   @default("MEDIUM")
+  estimatedMinutes  Int?
+  instructions      String?
+  referenceUrl      String?
+  startDate         DateTime?
+  dueDate           DateTime?
+  status            String   @default("UNASSIGNED")
+  assignmentMode    String   @default("AUTOMATIC")
+  organizationId    String?
+  createdBy         String
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  creator           User     @relation("CreatedTopics", fields: [createdBy], references: [id])
+  organization      Organization? @relation(fields: [organizationId], references: [id])
+  assignments       TopicAssignment[]
+  assignmentHistory TopicAssignmentHistory[]
+}
+
+model TopicAssignment {
+  id             String    @id @default(cuid())
+  topicId        String
+  memberId       String
+  assignedAt     DateTime  @default(now())
+  assignedBy     String?
+  assignmentType String    @default("AUTOMATIC")
+  status         String    @default("ASSIGNED")
+  completedAt    DateTime?
+  notes          String?
+  progress       Int       @default(0)
+
+  topic          Topic     @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  member         User      @relation("AssignedTopics", fields: [memberId], references: [id], onDelete: Cascade)
+  assigner       User?     @relation("AssignedTopicActions", fields: [assignedBy], references: [id])
+
+  @@unique([topicId, memberId])
+}
+
+model TopicAssignmentHistory {
+  id               String    @id @default(cuid())
+  topicId          String
+  previousMemberId String?
+  newMemberId      String?
+  assignmentType   String
+  assignedBy       String?
+  reason           String?
+  createdAt        DateTime  @default(now())
+
+  topic            Topic     @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  previousMember   User?     @relation("PreviousMemberHistory", fields: [previousMemberId], references: [id])
+  newMember        User?     @relation("NewMemberHistory", fields: [newMemberId], references: [id])
+  assigner         User?     @relation("HistoryAssigner", fields: [assignedBy], references: [id])
+}
+
+model SystemSetting {
+  id    String @id @default(cuid())
+  key   String @unique
+  value String // Stored as JSON
 }

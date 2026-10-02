@@ -4,7 +4,7 @@
   --background: #fdfbf7; /* Warm cream background */
   --foreground: #4a3320; /* Dark warm brown text */
   
-  --primary: #65482f;
+  --primary: #b5482f;
   --primary-foreground: #ffffff;
   
   --accent: #f3dd6d;
@@ -24,13 +24,13 @@
   --color-sidebar-bg: var(--sidebar-background);
   --color-sidebar-fg: var(--sidebar-foreground);
   
-  --font-sans: var(--font-geist-sans);
+  --font-sans: "Sweet Sans Pro", sans-serif;
   --font-mono: var(--font-geist-mono);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
   @apply antialiased;
 }

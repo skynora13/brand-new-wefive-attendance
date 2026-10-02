@@ -8,7 +8,6 @@ export default async function AdminDashboard() {
   const today = startOfDay(istTime);
   const endToday = endOfDay(istTime);
 
-  // Fallback data if DB fails during SSR
   let stats = {
     totalMembers: 0,
     presentToday: 0,
@@ -18,11 +17,16 @@ export default async function AdminDashboard() {
     currentlyWorking: 0,
     totalHours: 0,
     overtime: 0,
+    activeTopics: 0,
   };
 
   try {
     const totalMembers = await prisma.user.count({
       where: { role: "MEMBER" },
+    });
+
+    const activeTopicsCount = await prisma.topic.count({
+      where: { status: { in: ["ASSIGNED", "IN_PROGRESS"] } }
     });
 
     const todayAttendance = await prisma.attendanceRecord.findMany({
@@ -53,6 +57,7 @@ export default async function AdminDashboard() {
       currentlyWorking: working,
       totalHours: Math.round(totalWorkHours * 10) / 10,
       overtime: Math.round(totalOvertimeHours * 10) / 10,
+      activeTopics: activeTopicsCount,
     };
   } catch (error) {
     console.error("Error fetching admin stats", error);
@@ -60,6 +65,7 @@ export default async function AdminDashboard() {
 
   const statCards = [
     { label: "Total Members", value: stats.totalMembers, icon: <Users size={24} className="text-primary" /> },
+    { label: "Active Topics", value: stats.activeTopics, icon: <Briefcase size={24} className="text-purple-600" /> },
     { label: "Present Today", value: stats.presentToday, icon: <UserCheck size={24} className="text-green-600" /> },
     { label: "Late Today", value: stats.lateToday, icon: <Clock size={24} className="text-yellow-600" /> },
     { label: "Absent Today", value: stats.absentToday, icon: <UserX size={24} className="text-red-600" /> },
@@ -99,8 +105,8 @@ export default async function AdminDashboard() {
           <a href="/admin/attendance" className="px-4 py-2 border border-gray-300 text-gray-700 rounded-md text-sm hover:bg-gray-50 transition-colors">
             View Attendance
           </a>
-          <a href="/admin/leave" className="px-4 py-2 border border-gray-300 text-gray-700 rounded-md text-sm hover:bg-gray-50 transition-colors">
-            Leave Requests
+          <a href="/admin/topics" className="px-4 py-2 border border-gray-300 text-gray-700 rounded-md text-sm hover:bg-gray-50 transition-colors">
+            Manage Topics
           </a>
         </div>
       </div>

@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { format } from "date-fns";
 import Link from "next/link";
+import DeleteMemberButton from "@/components/admin/DeleteMemberButton";
 
 export default async function AdminMembersPage() {
   const members = await prisma.user.findMany({
@@ -75,7 +76,8 @@ export default async function AdminMembersPage() {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <a href={`/admin/members/${member.id}`} className="text-primary hover:text-primary/80 mr-4">View</a>
-                    <a href="#" className="text-gray-500 hover:text-gray-700">Edit</a>
+                    <a href={`/admin/members/${member.id}/edit`} className="text-gray-500 hover:text-gray-700">Edit</a>
+                    <DeleteMemberButton id={member.id} />
                   </td>
                 </tr>
               ))}

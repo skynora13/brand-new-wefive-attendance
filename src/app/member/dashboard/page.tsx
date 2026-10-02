@@ -164,8 +164,9 @@ export default function MemberDashboard() {
         </div>
         
         <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-6">
-          <h3 className="font-semibold text-gray-800 mb-4">Upcoming Tasks</h3>
-          <p className="text-sm text-gray-500 italic">No tasks assigned currently.</p>
+          <h3 className="font-semibold text-gray-800 mb-4">Assigned Topics</h3>
+          <p className="text-sm text-gray-500 italic mb-4">Check your currently assigned topics.</p>
+          <a href="/member/topics" className="text-primary text-sm font-medium inline-block hover:underline">View My Topics &rarr;</a>
         </div>
       </div>
     </div>
