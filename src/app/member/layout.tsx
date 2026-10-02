@@ -38,6 +38,10 @@ export default async function MemberLayout({
             <Calendar size={20} />
             <span>Leave</span>
           </Link>
+          <Link href="/member/holidays" className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-primary/10 transition-colors text-gray-800 hover:text-primary">
+            <Calendar size={20} />
+            <span>Holidays</span>
+          </Link>
           <Link href="/member/tasks" className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-primary/10 transition-colors text-gray-800 hover:text-primary">
             <CheckSquare size={20} />
             <span>Tasks</span>
