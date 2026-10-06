@@ -17,7 +17,7 @@ export async function assignTopic(topicId: string, organizationId?: string | nul
   }
 
   // get available members
-  const members = await prisma.user.findMany({
+  let members = await prisma.user.findMany({
     where: { 
       role: "MEMBER",
       status: "ACTIVE",
@@ -33,9 +33,23 @@ export async function assignTopic(topicId: string, organizationId?: string | nul
 
   if (members.length === 0) return null;
 
+  // Filter members by category if strategy is CATEGORY_BASED and topic has a category
+  if (strategy === "CATEGORY_BASED" && topic.category) {
+    const categoryLower = topic.category.toLowerCase();
+    const categoryMembers = members.filter(m => 
+      m.department && m.department.toLowerCase().includes(categoryLower)
+    );
+    // Only apply filter if at least one member matches, otherwise fallback to all members
+    if (categoryMembers.length > 0) {
+      members = categoryMembers;
+    }
+  }
+
   let selectedMemberId: string | null = null;
 
-  if (strategy === "BALANCED_WORKLOAD") {
+  // If strategy is CATEGORY_BASED, we still need a way to distribute among eligible members.
+  // We'll use BALANCED_WORKLOAD as the secondary balancing rule among them.
+  if (strategy === "BALANCED_WORKLOAD" || strategy === "CATEGORY_BASED") {
     // Member with least active topics
     members.sort((a, b) => a.assignedTopics.length - b.assignedTopics.length);
     selectedMemberId = members[0].id;

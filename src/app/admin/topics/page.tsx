@@ -88,6 +88,16 @@ export default function AdminTopicsPage() {
               />
               Balanced Workload
             </label>
+            <label className="flex items-center gap-2">
+              <input 
+                type="radio" 
+                name="strategy" 
+                value="CATEGORY_BASED" 
+                checked={strategy === "CATEGORY_BASED"}
+                onChange={(e) => saveSettings(e.target.value)}
+              />
+              Category-Based
+            </label>
           </div>
         </div>
       )}
