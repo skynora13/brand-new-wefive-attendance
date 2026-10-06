@@ -38,6 +38,14 @@ export default async function AdminLayout({
             <Users size={20} />
             <span className="text-sm font-medium">Members</span>
           </Link>
+          <Link href="/admin/topics" className="flex items-center gap-3 px-3 py-2.5 rounded-md hover:bg-primary/10 transition-colors text-gray-800 hover:text-primary">
+            <FileText size={20} />
+            <span className="text-sm font-medium">Topics</span>
+          </Link>
+          <Link href="/admin/assignments" className="flex items-center gap-3 px-3 py-2.5 rounded-md hover:bg-primary/10 transition-colors text-gray-800 hover:text-primary">
+            <CheckSquare size={20} />
+            <span className="text-sm font-medium">Assignments</span>
+          </Link>
           <Link href="/admin/leave" className="flex items-center gap-3 px-3 py-2.5 rounded-md hover:bg-primary/10 transition-colors text-gray-800 hover:text-primary">
             <Calendar size={20} />
             <span className="text-sm font-medium">Leave Management</span>

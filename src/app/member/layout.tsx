@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import Link from "next/link";
-import { LogOut, LayoutDashboard, Clock, Calendar, Bell, User, CheckSquare, Video, BarChart2 } from "lucide-react";
+import { LogOut, LayoutDashboard, Clock, Calendar, Bell, User, CheckSquare, Video, BarChart2, FileText } from "lucide-react";
 import LogoutButton from "./LogoutButton";
 
 export default async function MemberLayout({
@@ -41,6 +41,10 @@ export default async function MemberLayout({
           <Link href="/member/tasks" className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-primary/10 transition-colors text-gray-800 hover:text-primary">
             <CheckSquare size={20} />
             <span>Tasks</span>
+          </Link>
+          <Link href="/member/topics" className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-primary/10 transition-colors text-gray-800 hover:text-primary">
+            <FileText size={20} />
+            <span>My Topics</span>
           </Link>
           <Link href="/member/notifications" className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-primary/10 transition-colors text-gray-800 hover:text-primary">
             <Bell size={20} />
