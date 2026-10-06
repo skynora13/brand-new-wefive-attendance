@@ -19,13 +19,13 @@ export default async function MemberLayout({
   return (
     <div className="min-h-screen flex bg-background">
       {/* Sidebar */}
-      <aside className="w-64 bg-accent text-gray-900 flex flex-col fixed inset-y-0 left-0 border-r border-yellow-200/50">
+      <aside className="w-64 bg-accent text-gray-900 flex flex-col fixed inset-y-0 left-0 overflow-y-auto border-r border-yellow-200/50">
         <div className="p-6 sticky top-0 bg-accent z-10">
           <h1 className="text-2xl font-bold text-primary">WeFive</h1>
           <p className="text-sm font-medium text-gray-700">Member Portal</p>
         </div>
         
-        <nav className="flex-1 px-4 space-y-2 mt-4 font-medium">
+        <nav className="flex-1 px-4 space-y-2 mt-4 pb-6 font-medium">
           <Link href="/member/dashboard" className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-primary/10 transition-colors text-gray-800 hover:text-primary">
             <LayoutDashboard size={20} />
             <span>Dashboard</span>
@@ -64,7 +64,7 @@ export default async function MemberLayout({
           </Link>
         </nav>
         
-        <div className="p-4 border-t border-primary/10">
+        <div className="p-4 border-t border-primary/10 sticky bottom-0 bg-accent z-10">
           <LogoutButton />
         </div>
       </aside>
