@@ -16,9 +16,26 @@ export async function DELETE(
       return NextResponse.json({ error: "Member not found" }, { status: 404 });
     }
 
-    await prisma.user.delete({
-      where: { id }
-    });
+    // Delete all dependent records in a transaction to avoid foreign key constraints
+    await prisma.$transaction([
+      prisma.attendanceRecord.deleteMany({ where: { userId: id } }),
+      prisma.leaveRequest.deleteMany({ where: { userId: id } }),
+      prisma.leaveBalance.deleteMany({ where: { userId: id } }),
+      prisma.taskAssignment.deleteMany({ where: { userId: id } }),
+      prisma.taskComment.deleteMany({ where: { userId: id } }),
+      prisma.auditLog.deleteMany({ where: { actorId: id } }),
+      prisma.topicAssignmentHistory.deleteMany({
+        where: {
+          OR: [
+            { previousMemberId: id },
+            { newMemberId: id },
+            { assignedBy: id }
+          ]
+        }
+      }),
+      prisma.topicAssignment.deleteMany({ where: { memberId: id } }),
+      prisma.user.delete({ where: { id } })
+    ]);
 
     return NextResponse.json({ message: "Member deleted successfully" });
   } catch (error) {
