@@ -5,6 +5,8 @@ import Link from "next/link";
 import { LogOut, LayoutDashboard, Clock, Calendar, Bell, User, CheckSquare, Video, BarChart2, FileText } from "lucide-react";
 import LogoutButton from "./LogoutButton";
 
+import LiveClock from "@/components/LiveClock";
+
 export default async function MemberLayout({
   children,
 }: {
@@ -75,7 +77,7 @@ export default async function MemberLayout({
           <h2 className="text-xl font-semibold text-gray-800">Welcome, {session.user.name}</h2>
           <div className="flex items-center gap-4">
             <div className="text-sm text-gray-500 font-medium">
-              {new Date().toLocaleDateString('en-IN', { timeZone: 'Asia/Kolkata', dateStyle: 'full' })}
+              <LiveClock />
             </div>
           </div>
         </header>

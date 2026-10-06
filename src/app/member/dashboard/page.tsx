@@ -30,7 +30,7 @@ export default function MemberDashboard() {
     fetchAttendance();
   }, []);
 
-  const handlePunch = async (action: "PUNCH_IN" | "PUNCH_OUT") => {
+  const handlePunch = async (action: "PUNCH_IN" | "PUNCH_OUT" | "START_BREAK" | "END_BREAK") => {
     setActionLoading(true);
     setError("");
     try {
@@ -56,6 +56,8 @@ export default function MemberDashboard() {
   if (loading) {
     return <div className="animate-pulse">Loading dashboard...</div>;
   }
+
+  const activeBreak = attendance?.breaks?.find((b: any) => !b.endTime);
 
   return (
     <div className="space-y-6">
@@ -99,17 +101,40 @@ export default function MemberDashboard() {
               <div className="text-sm text-green-800 space-y-1">
                 <p>Status: <span className="font-bold">{attendance.status}</span></p>
                 <p>Time: {new Date(attendance.punchIn).toLocaleTimeString('en-US', { timeZone: 'Asia/Kolkata' })}</p>
+                {attendance.breakHours > 0 && (
+                  <p>Break Taken: <span className="font-bold">{attendance.breakHours.toFixed(2)} hrs</span></p>
+                )}
               </div>
             </div>
             
-            <button
-              onClick={() => handlePunch("PUNCH_OUT")}
-              disabled={actionLoading}
-              className="mx-auto flex items-center justify-center gap-3 bg-red-600 text-white text-xl font-medium px-12 py-4 rounded-full hover:bg-red-700 transition-all hover:shadow-lg disabled:opacity-70 disabled:cursor-not-allowed"
-            >
-              <Square fill="currentColor" size={24} />
-              {actionLoading ? "Processing..." : "PUNCH OUT"}
-            </button>
+            <div className="flex flex-col md:flex-row justify-center gap-4">
+              {activeBreak ? (
+                <button
+                  onClick={() => handlePunch("END_BREAK")}
+                  disabled={actionLoading}
+                  className="flex items-center justify-center gap-2 bg-yellow-500 text-white font-medium px-8 py-3 rounded-full hover:bg-yellow-600 transition-all disabled:opacity-70"
+                >
+                  End Break
+                </button>
+              ) : (
+                <button
+                  onClick={() => handlePunch("START_BREAK")}
+                  disabled={actionLoading}
+                  className="flex items-center justify-center gap-2 bg-blue-500 text-white font-medium px-8 py-3 rounded-full hover:bg-blue-600 transition-all disabled:opacity-70"
+                >
+                  Start Break
+                </button>
+              )}
+
+              <button
+                onClick={() => handlePunch("PUNCH_OUT")}
+                disabled={actionLoading}
+                className="flex items-center justify-center gap-2 bg-red-600 text-white font-medium px-8 py-3 rounded-full hover:bg-red-700 transition-all hover:shadow-lg disabled:opacity-70 disabled:cursor-not-allowed"
+              >
+                <Square fill="currentColor" size={20} />
+                {actionLoading ? "..." : "PUNCH OUT"}
+              </button>
+            </div>
           </div>
         ) : (
           <div className="space-y-6">
@@ -135,6 +160,12 @@ export default function MemberDashboard() {
                   <span>Total Hours</span>
                   <span className="font-bold text-primary">{attendance.workHours?.toFixed(2)} hrs</span>
                 </div>
+                {attendance.breakHours > 0 && (
+                  <div className="flex justify-between border-b pb-2 text-yellow-600">
+                    <span>Break Taken</span>
+                    <span className="font-bold">{attendance.breakHours.toFixed(2)} hrs</span>
+                  </div>
+                )}
                 {attendance.overtimeHours > 0 && (
                   <div className="flex justify-between text-orange-600">
                     <span>Overtime</span>

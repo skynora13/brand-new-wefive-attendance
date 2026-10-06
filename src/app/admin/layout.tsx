@@ -5,6 +5,8 @@ import Link from "next/link";
 import { LogOut, LayoutDashboard, Users, Calendar, Clock, Briefcase, Bell, Settings, FileText, CheckSquare, Shield, Video, BarChart2 } from "lucide-react";
 import LogoutButton from "../member/LogoutButton";
 
+import LiveClock from "@/components/LiveClock";
+
 export default async function AdminLayout({
   children,
 }: {
@@ -99,7 +101,7 @@ export default async function AdminLayout({
           <h2 className="text-xl font-semibold text-gray-800">Administrator Control</h2>
           <div className="flex items-center gap-4">
             <div className="text-sm text-gray-500 font-medium">
-              {new Date().toLocaleDateString('en-IN', { timeZone: 'Asia/Kolkata', dateStyle: 'full' })}
+              <LiveClock />
             </div>
           </div>
         </header>

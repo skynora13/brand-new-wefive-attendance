@@ -23,6 +23,9 @@ export async function GET(request: Request) {
           date: today,
         },
       },
+      include: {
+        breaks: true
+      }
     });
     
     return NextResponse.json({ success: true, data: attendance });
@@ -93,6 +96,7 @@ export async function POST(request: Request) {
           punchIn: now, // Storing absolute time, assuming backend timezone is UTC but calculations are in IST
           status: status as any,
         },
+        include: { breaks: true }
       });
       
       return NextResponse.json({ success: true, data: attendance });
@@ -105,6 +109,7 @@ export async function POST(request: Request) {
             date: today,
           },
         },
+        include: { breaks: true }
       });
 
       if (!existing || !existing.punchIn) {
@@ -115,9 +120,23 @@ export async function POST(request: Request) {
         return NextResponse.json({ success: false, error: "Already punched out for today" }, { status: 400 });
       }
 
+      // If there is an active break, auto-end it
+      const activeBreak = existing.breaks.find((b: any) => !b.endTime);
+      let additionalBreakHours = 0;
+      if (activeBreak) {
+         const breakDuration = (now.getTime() - new Date(activeBreak.startTime).getTime()) / (1000 * 60 * 60);
+         await prisma.attendanceBreak.update({
+           where: { id: activeBreak.id },
+           data: { endTime: now, duration: breakDuration }
+         });
+         additionalBreakHours = breakDuration;
+      }
+
       // Calculate work hours
       const workMs = now.getTime() - existing.punchIn.getTime();
-      const workHours = workMs / (1000 * 60 * 60);
+      const totalHours = workMs / (1000 * 60 * 60);
+      const totalBreakHours = (existing.breakHours || 0) + additionalBreakHours;
+      const workHours = Math.max(0, totalHours - totalBreakHours);
       
       // Calculate overtime if shift exists
       let overtimeHours = 0;
@@ -143,10 +162,66 @@ export async function POST(request: Request) {
           punchOut: now,
           workHours,
           overtimeHours,
+          breakHours: totalBreakHours
         },
+        include: { breaks: true }
       });
       
       return NextResponse.json({ success: true, data: attendance });
+    } else if (action === "START_BREAK") {
+      const existing = await prisma.attendanceRecord.findUnique({
+        where: {
+          userId_date: {
+            userId: session.user.id,
+            date: today,
+          },
+        },
+        include: { breaks: true }
+      });
+      if (!existing || !existing.punchIn) return NextResponse.json({ success: false, error: "Not punched in" }, { status: 400 });
+      if (existing.punchOut) return NextResponse.json({ success: false, error: "Already punched out" }, { status: 400 });
+      
+      const activeBreak = existing.breaks.find((b: any) => !b.endTime);
+      if (activeBreak) return NextResponse.json({ success: false, error: "Already on a break" }, { status: 400 });
+
+      await prisma.attendanceBreak.create({
+        data: {
+          attendanceId: existing.id,
+          startTime: now,
+        }
+      });
+
+      const updated = await prisma.attendanceRecord.findUnique({ where: { id: existing.id }, include: { breaks: true } });
+      return NextResponse.json({ success: true, data: updated });
+    } else if (action === "END_BREAK") {
+      const existing = await prisma.attendanceRecord.findUnique({
+        where: {
+          userId_date: {
+            userId: session.user.id,
+            date: today,
+          },
+        },
+        include: { breaks: true }
+      });
+      if (!existing) return NextResponse.json({ success: false, error: "Not punched in" }, { status: 400 });
+      
+      const activeBreak = existing.breaks.find((b: any) => !b.endTime);
+      if (!activeBreak) return NextResponse.json({ success: false, error: "Not currently on a break" }, { status: 400 });
+
+      const duration = (now.getTime() - new Date(activeBreak.startTime).getTime()) / (1000 * 60 * 60);
+
+      await prisma.attendanceBreak.update({
+        where: { id: activeBreak.id },
+        data: { endTime: now, duration }
+      });
+
+      const updated = await prisma.attendanceRecord.update({
+        where: { id: existing.id },
+        data: { breakHours: (existing.breakHours || 0) + duration },
+        include: { breaks: true }
+      });
+
+      return NextResponse.json({ success: true, data: updated });
     }
     
     return NextResponse.json({ success: false, error: "Invalid action" }, { status: 400 });
